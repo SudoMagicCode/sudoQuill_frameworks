@@ -1,0 +1,44 @@
+name: Generate Version Update JSON
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  Build_tox:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Get commit count since last tag
+        id: commit_count_step
+        run: |
+          LAST_TAG=$(git describe --tags --abbrev=0)
+          # If no previous tag exists, count from the beginning
+          if [ -z "$LAST_TAG" ]; then
+              COUNT=$(git rev-list --count HEAD)
+          else
+              COUNT=$(git rev-list --count $LAST_TAG..HEAD)
+          fi
+          echo "COMMIT_COUNT=$COUNT" >> $GITHUB_OUTPUT
+
+      - name: Set up Python
+        uses: actions/setup-python@v5 # Use the latest version
+        with:
+          python-version: "3.14" # Specify the Python version you need
+
+      - name: Build SudoFrameworks
+        run: python main.py
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref_name }}
+          files: ./release/sudoFrameworks.json
