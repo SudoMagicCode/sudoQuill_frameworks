@@ -1,8 +1,12 @@
 import csv
 import json
+import os
 from dataclasses import dataclass
+from pathlib import Path
 
+OUTPUT_DIR = "release"
 OUTPUT_FILE = "sudoFrameworks.json"
+INPUT_FILE = "data/quillFrameworks.csv"
 
 
 @dataclass
@@ -53,7 +57,7 @@ class FramworkEntry:
 
 def read_file() -> list[FramworkEntry]:
     entries = []
-    with open("quillFrameworks.csv", newline="") as csvFile:
+    with open(INPUT_FILE, newline="") as csvFile:
         frameworkReader = csv.reader(csvFile, delimiter=",")
         # skip header row
         next(frameworkReader)
@@ -65,6 +69,14 @@ def read_file() -> list[FramworkEntry]:
 
 
 def output_file(entries: list[FramworkEntry]):
+    # ensure our output path exists
+    path = Path(OUTPUT_DIR)
+    if path.is_dir():
+        pass
+    else:
+        # create path if it does not yet exist
+        os.mkdir(OUTPUT_DIR)
+
     frameworks = []
 
     for each in entries:
@@ -72,7 +84,9 @@ def output_file(entries: list[FramworkEntry]):
 
     output_json = {"frameworks": frameworks}
 
-    with open(OUTPUT_FILE, "w") as json_file:
+    # output file to disk
+    output_file = path / OUTPUT_FILE
+    with open(output_file, "w") as json_file:
         json.dump(output_json, json_file)
 
 
