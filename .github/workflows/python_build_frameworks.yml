@@ -52,7 +52,7 @@ jobs:
         run: python main.py
 
       - name: Create GitHub Release and upload assets
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: release/sudoFrameworks.json # Upload all files in the build directory
           tag_name: ${{ steps.set_version.outputs.NEW_VERSION }}
